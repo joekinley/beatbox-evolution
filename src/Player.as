@@ -2,7 +2,9 @@ package
 {
   import org.flixel.FlxG;
   import org.flixel.FlxObject;
+  import org.flixel.FlxSound;
   import org.flixel.FlxSprite;
+  import org.flixel.FlxU;
 	/**
    * ...
    * @author Rafael Wenzel
@@ -12,6 +14,7 @@ package
 
     private var jump:Number;
     private var inAirTime:Number;
+    private var jumpSounds:Array;
 
     public function Player()
     {
@@ -25,11 +28,14 @@ package
 
       this.loadGraphic( Globals.GFX_TILES, false, false, Globals.GAME_TILE_WIDTH, Globals.GAME_TILE_HEIGHT );
       this.addAnimation( 'idle', [1], Globals.PLAYER_FPS );
+
+      this.initializeJumpSounds( );
     }
 
     override public function update( ):void {
       super.update( );
 
+      this.handleSound( );
       this.handleMovement( );
       this.handleAnimation( );
     }
@@ -89,6 +95,20 @@ package
 
     public function handleAnimation( ):void {
       if ( velocity.x == 0 && velocity.y == 0 ) play( 'idle' );
+    }
+
+    public function handleSound( ):void {
+      if ( FlxG.keys.justPressed( 'UP' ) ) this.playJumpSound( );
+    }
+
+    public function playJumpSound( ):void {
+      (FlxSound)(FlxG.getRandom( this.jumpSounds )).play( true );
+    }
+
+    public function initializeJumpSounds( ):void {
+      this.jumpSounds = new Array;
+      this.jumpSounds.push( FlxG.loadSound( Globals.SOUND_WUB_1 ) );
+      this.jumpSounds.push( FlxG.loadSound( Globals.SOUND_WUB_2 ) );
     }
 
   }

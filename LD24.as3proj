@@ -5,7 +5,7 @@
     <movie disabled="False" />
     <movie input="" />
     <movie path="bin\LD24.swf" />
-    <movie fps="30" />
+    <movie fps="90" />
     <movie width="640" />
     <movie height="480" />
     <movie version="10" />
