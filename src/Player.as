@@ -11,7 +11,6 @@ package
    */
   public class Player extends FlxSprite
   {
-
     private var jump:Number;
     private var inAirTime:Number;
     private var jumpSounds:Array;
@@ -24,7 +23,7 @@ package
       this.inAirTime = 0;
 
       this.acceleration.y = Globals.PLAYER_GRAVITY;
-      this.maxVelocity.y = Globals.PLAYER_GRAVITY * 2;
+      this.maxVelocity.y = Globals.PLAYER_GRAVITY * 5;
 
       this.loadGraphic( Globals.GFX_TILES, false, false, Globals.GAME_TILE_WIDTH, Globals.GAME_TILE_HEIGHT );
       this.addAnimation( 'idle', [1], Globals.PLAYER_FPS );
@@ -87,7 +86,7 @@ package
       }
 
       // touching floor
-      if ( this.isTouching( FlxObject.FLOOR ) ) {
+      if ( this.isTouching( FlxObject.FLOOR ) && !FlxG.keys.UP ) {
         this.jump = 0;
         this.inAirTime = 0;
       }
@@ -98,7 +97,8 @@ package
     }
 
     public function handleSound( ):void {
-      if ( FlxG.keys.justPressed( 'UP' ) ) this.playJumpSound( );
+      if ( FlxG.keys.justPressed( 'UP' ) ) this.jumpSounds[ 0 ].play( true );
+      if ( FlxG.keys.justPressed( 'DOWN' ) ) this.jumpSounds[ 1 ].play( true );
     }
 
     public function playJumpSound( ):void {

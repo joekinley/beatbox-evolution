@@ -35,7 +35,13 @@ package
     private var currentBeat8:Array;
     private var currentBeat16:Array;
 
+    private var enemy1:Array;
+    private var enemy4:Array;
+    private var enemy8:Array;
+    private var enemy16:Array;
+
     private var sounds:Array;
+    private var wubSound:FlxSound;
 
     public function Beatbox( bpm:int )
     {
@@ -44,7 +50,42 @@ package
       this.queue = new Array;
       this.sounds = new Array;
 
+      this.enemy1 = new Array;
+      this.enemy4 = new Array;
+      this.enemy8 = new Array;
+      this.enemy16 = new Array;
+
       this.initializeSounds( );
+    }
+
+    public function getQueue( ):Array {
+      return this.queue;
+    }
+
+    public function hasJustbeat1( ):Boolean {
+      return this.justbeat1;
+    }
+    public function hasJustbeat4( ):Boolean {
+      return this.justbeat4;
+    }
+    public function hasJustbeat8( ):Boolean {
+      return this.justbeat8;
+    }
+    public function hasJustbeat16( ):Boolean {
+      return this.justbeat16;
+    }
+
+    public function addEnemy1( idx:int, enemy:Enemy ):void {
+      this.enemy1[ idx ] = enemy;
+    }
+    public function addEnemy4( idx:int, enemy:Enemy ):void {
+      this.enemy4[ idx ] = enemy;
+    }
+    public function addEnemy8( idx:int, enemy:Enemy ):void {
+      this.enemy8[ idx ] = enemy;
+    }
+    public function addEnemy16( idx:int, enemy:Enemy ):void {
+      this.enemy16[ idx ] = enemy;
     }
 
     public function update( ):void {
@@ -74,7 +115,11 @@ package
         this.currentBeat8 = this.queueItem.getBeat8( ).slice( );
         this.currentBeat16 = this.queueItem.getBeat16( ).slice( );
         this.queueBeats = 0;
+
+        if( FlxG.music != null ) FlxG.music.stop( );
+        FlxG.playMusic( Globals.MUSIC_BEAT_1 );
       }
+
       // handle empty beat queues
       if ( this.currentBeat1.length == 0 ) this.currentBeat1 = this.queueItem.getBeat1( ).slice( );
       if ( this.currentBeat4.length == 0 ) this.currentBeat4 = this.queueItem.getBeat4( ).slice( );
@@ -84,10 +129,10 @@ package
     }
 
     public function playQueue( ):void {
-      if ( this.justbeat1 ) this.playBeat( this.currentBeat1.shift( ) );
-      if ( this.justbeat4 ) this.playBeat( this.currentBeat4.shift( ) );
-      if ( this.justbeat8 ) this.playBeat( this.currentBeat8.shift( ) );
-      if ( this.justbeat16 ) this.playBeat( this.currentBeat16.shift( ) );
+      if ( this.justbeat1 ) this.playBeat( this.currentBeat1.shift( ), 1 );
+      if ( this.justbeat4 ) this.playBeat( this.currentBeat4.shift( ), 4 );
+      if ( this.justbeat8 ) this.playBeat( this.currentBeat8.shift( ), 8 );
+      if ( this.justbeat16 ) this.playBeat( this.currentBeat16.shift( ), 16 );
     }
 
     public function addBeat( beat:Beat ):void {
@@ -150,12 +195,49 @@ package
       this.sounds[ 6 ] = FlxG.loadSound( Globals.SOUND_PF_1 );
       this.sounds[ 7 ] = FlxG.loadSound( Globals.SOUND_PSCH_1 );
       this.sounds[ 8 ] = FlxG.loadSound( Globals.SOUND_EH_1 );
+      this.sounds[ 9 ] = FlxG.loadSound( Globals.SOUND_POP_1 );
+      this.sounds[ 10 ] = FlxG.loadSound( Globals.SOUND_DROP_1 );
+      this.sounds[ 11 ] = FlxG.loadSound( Globals.SOUND_POP_2 );
+      this.sounds[ 12 ] = FlxG.loadSound( Globals.SOUND_TSCH_1 );
+      this.sounds[ 13 ] = FlxG.loadSound( Globals.SOUND_WUH_1 );
+      this.sounds[ 14 ] = FlxG.loadSound( Globals.SOUND_BM_2 );
+      this.sounds[ 15 ] = FlxG.loadSound( Globals.SOUND_CHA_1 );
+      this.sounds[ 16 ] = FlxG.loadSound( Globals.SOUND_TING_1 );
+      this.wubSound = FlxG.loadSound( Globals.SOUND_WUB_1 );
       Globals.GAME_SOUNDS = this.sounds;
     }
 
-    private function playBeat( no:int ):void {
+    public function killEnemy( enemy:Enemy ):void {
+      var type:int = enemy.getBoundType( );
+      switch( type ) {
+        case 1: this.enemy1.splice( enemy.getBoundBeat( ) ); break;
+        case 4: this.enemy4.splice( enemy.getBoundBeat( ) ); break;
+        case 8: this.enemy8.splice( enemy.getBoundBeat( ) ); break;
+        case 16: this.enemy16.splice( enemy.getBoundBeat( ) ); break;
+      }
+      this.removeBeat( enemy.getBoundBeat( ), enemy.getBoundType( ) );
+      Globals.GAME_LAYER_ENEMIES.remove( enemy, true );
+    }
+
+    private function removeBeat( beat:int, type:int ):void {
+      var temp:Array;
+      var beatObj:Beat = this.queue[ 0 ];
+      switch( type ) {
+        case 1: temp = beatObj.getBeat1( ); break;
+        case 4: temp = beatObj.getBeat4( ); break;
+        case 8: temp = beatObj.getBeat8( ); break;
+        case 16: temp = beatObj.getBeat16( ); break;
+      }
+
+      for ( var i:int = 0; i < temp.length; i++ ) {
+        if ( temp[ i ] == beat ) temp[ i ] = 0; // -1;
+      }
+    }
+
+    private function playBeat( no:int, beat:int ):void {
 
       switch( no ) {
+        case -1: this.wubSound.play( true ); break;
         case 1:
         case 2:
         case 3:
@@ -164,6 +246,23 @@ package
         case 6:
         case 7:
         case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+          (FlxSound)(this.sounds[ no ]).play( true );
+          switch( beat ) {
+            case 1: if( this.enemy1[ no ] != null ) (Enemy)(this.enemy1[ no ]).attack( 1 ); break;
+            case 4: if( this.enemy4[ no ] != null ) (Enemy)(this.enemy4[ no ]).attack( 4 ); break;
+            case 8: if( this.enemy8[ no ] != null ) (Enemy)(this.enemy8[ no ]).attack( 8 ); break;
+            case 16: if( this.enemy16[ no ] != null ) (Enemy)(this.enemy16[ no ]).attack( 16 ); break;
+          }
+          break;
+        case 20:
           (FlxSound)(this.sounds[ no ]).play( true );
           break;
         default: break;

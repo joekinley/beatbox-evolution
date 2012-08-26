@@ -17,10 +17,10 @@ package
     public function generateBeat( ):Beat {
       var beat:Beat = new Beat;
 
-      beat.applyBeat1( this.randomBeat( 16, 2, 5 ) );
-      beat.applyBeat4( this.randomBeat( 16, 4, 35 ) );
-      beat.applyBeat8( this.randomBeat( 16, 4, 55 ) );
-      beat.applyBeat16( this.randomBeat( 16, 2, 20 ) );
+      beat.applyBeat1( this.randomBeat( 2, 2, 5 ) );
+      beat.applyBeat4( this.randomBeat( 8, 4, 35 ) );
+      beat.applyBeat8( this.randomBeat( 32, 4, 55 ) );
+      beat.applyBeat16( this.randomBeat( 32, 2, 20 ) );
 
       return beat;
     }
